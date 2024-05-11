@@ -1,3 +1,8 @@
+
+
+
+//objects for markeplace
+
 class Product {
     constructor (id="", name="", desc="", price=0) {
      this.id = id;

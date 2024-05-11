@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <IndexPage></IndexPage>
+    <router-view></router-view>
   </div>
 </template>
 
