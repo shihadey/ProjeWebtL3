@@ -4,9 +4,12 @@
     <div class="jumbotron jumbotron-fluid bg-secondary rounded-bottom rounded-top" style="padding-top: 30px; padding-bottom: 30px; padding-left: 30px;">
         <div class="banner-text text-white">
             <h1>VueJs Shopping App</h1>
+            <!-- //tester les routes -->
             <router-link to="/">Accueil</router-link>
             <router-link to="/products">Produits</router-link>
             <router-link to="/orders">Commandes</router-link>
+            <router-link to="/register">Creer compte</router-link>
+            <router-link to="/login">Se connecter</router-link>
         </div>
     </div>
     <br>
