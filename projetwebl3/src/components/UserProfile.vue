@@ -2,7 +2,7 @@
     <div>
       <!-- Afficher le message de bienvenue si l'utilisateur est connecté -->
       <div v-if="isLoggedIn" class="welcome-banner">
-        Bienvenue {{ username }}
+        Bienvenue {{ username }}, vous êtes {{ role }}
         <button @click="logout">Déconnexion</button>
       </div>
       <!-- Autres contenus de la page ici -->
@@ -28,7 +28,9 @@
         if (decodedToken && decodedToken.userId) {
           // Mettre à jour l'état de connexion et le nom d'utilisateur
           this.isLoggedIn = true;
-          this.username = decodedToken.username; // Assurez-vous que votre token JWT contient le nom d'utilisateur
+          this.username = decodedToken.username; 
+          // Obtenir le rôle de l'utilisateur
+          this.role = decodedToken.role;
         }
       }
     },

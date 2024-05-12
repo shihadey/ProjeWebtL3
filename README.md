@@ -39,6 +39,10 @@ FLUSH PRIVILEGES;
 
 ALTER USER 'adminwebmarkeplace'@'localhost' IDENTIFIED WITH mysql_native_password BY '198673476';
 
+INSERT INTO users (username, email, password, role)
+VALUES ('root', 'root@administrator.com', 'rootpassword', 'administrator');
+mdphaché = $2a$10$btdVTFgzZvYP9oaa7HBse.Q/DO20vFBEFL6yaf/cYSTizDOayC81S
+
 
 # TODO 
 - remplacer les routes fetch par des axios ?

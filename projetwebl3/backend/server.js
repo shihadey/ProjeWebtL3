@@ -54,6 +54,7 @@ app.post('/register', (req, res) => {
 
     // Enregistrer l'utilisateur dans la base de données avec le mot de passe haché
     connection.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [username, email, hash], (error, results) => {
+      // console.log("mdp haché", hash);
       if (error) {
         console.error('Erreur lors de l\'inscription de l\'utilisateur:', error);
         res.status(500).json({ message: 'Erreur serveur' });
@@ -62,30 +63,35 @@ app.post('/register', (req, res) => {
 
       // Récupérer l'ID de l'utilisateur nouvellement inséré
       const userId = results.insertId;
-      console.log('Utilisateur inséré avec l\'ID:', userId);
-
-      // Authentification réussie, générer un token JWT avec l'ID de l'utilisateur
-      const token = jwt.sign({ userId: userId, username: username}, my_secret_key, { expiresIn: '1h' });
-      res.json({ token });
+      // récupère le role de l'user crée
+      connection.query('SELECT * FROM users WHERE id =?', [userId], (error, results) => {
+        if (error) {
+          console.error('Erreur lors de la récupération du role de l\'utilisateur:', error);
+          res.status(500).json({ message: 'Erreur serveur' });
+          return;
+        }
+        // console.log("role de l'user crée", results[0].role_id);
+        const res_role = results[0].role;
+        // Authentification réussie, générer un token JWT avec l'ID de l'utilisateur
+        const token = jwt.sign({ userId: userId, username: username, role:res_role}, my_secret_key, { expiresIn: '1h' });
+        res.json({ token });
+      });
     });
   });
 });
-
-
 
 // Route pour l'authentification
 app.post('/login', (req, res) => {
   console.log('route login', req.body);
   const { email, password } = req.body;
 
-  // Vérification des identifiants dans la base de données
   connection.query('SELECT * FROM users WHERE email = ?', [email], (error, results) => {
     if (error) {
       console.error('Erreur lors de la vérification des identifiants:', error);
       res.status(500).json({ message: 'Erreur serveur' });
       return;
     }
-
+  
     if (results.length > 0) {
       // Utilisateur trouvé, vérifier le mot de passe
       const user = results[0];
@@ -96,8 +102,12 @@ app.post('/login', (req, res) => {
           return;
         }
         if (isMatch) {
-          // Mot de passe correct, générer un token JWT
-          const token = jwt.sign({ userId: user.id }, my_secret_key, { expiresIn: '1h' });
+          // Mot de passe correct, générer un token JWT avec l'ID de l'utilisateur
+          const userId = user.id;
+          const res_role = user.role;
+          const res_username = user.username;
+          // Authentification réussie, générer un token JWT avec l'ID de l'utilisateur
+          const token = jwt.sign({ userId: userId, username: res_username, role: res_role }, my_secret_key, { expiresIn: '1h' });    
           res.json({ token });
         } else {
           // Mot de passe incorrect
