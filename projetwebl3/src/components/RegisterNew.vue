@@ -46,9 +46,17 @@
           })
         })
         .then(response => {
-        if (response.ok) {
-            // Rediriger l'utilisateur vers une autre page après l'inscription
-            this.$router.push('/login');
+          if (response.ok) {
+            // Si la réponse est OK, obtenir le token JWT
+            response.json().then(data => {
+              const token = data.token;
+              // Afficher le token JWT dans la console pour le débogage
+              console.log("Token JWT reçu:", token);
+              // Stocker le token JWT dans le stockage local
+              localStorage.setItem('token', token);
+              // Rediriger l'utilisateur vers la page profil
+              this.$router.push('/profile');
+            });
         } else {
             // Afficher un message d'erreur avec le contenu de la réponse
             response.json().then(data => {

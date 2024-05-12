@@ -1,1 +1,4 @@
-SELECT * FROM users
+-- SELECT * FROM users
+
+-- DELETE ALL USERS
+DELETE FROM users

@@ -10,6 +10,7 @@
             <router-link to="/orders">Commandes</router-link>
             <router-link to="/register">Creer compte</router-link>
             <router-link to="/login">Se connecter</router-link>
+            <router-link to="/profile">Profil</router-link>
         </div>
     </div>
     <br>

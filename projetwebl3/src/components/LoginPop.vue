@@ -46,20 +46,24 @@ export default {
       })
       .then(response => {
         if (response.ok) {
-          // Mettre à jour l'état de connexion si l'authentification réussit
-          this.isLoggedIn = true;
-          // Rediriger l'utilisateur vers une autre page par exemple
-          // this.$router.push('/dashboard');
+          // Authentification réussie, enregistrer le token JWT dans le stockage local
+          return response.json();
         } else {
-          // Afficher un message d'erreur en cas d'identifiants invalides
-          this.error = 'Identifiants invalides';
+          throw new Error('Identifiants invalides');
         }
+      })
+      .then(data => {
+        // Stocker le token JWT dans le stockage local
+        localStorage.setItem('token', data.token);
+        // Rediriger l'utilisateur vers une autre page par exemple
+        this.$router.push('/profile');
       })
       .catch(error => {
         console.error('Erreur lors de la connexion:', error);
-        this.error = 'Erreur serveur';
+        this.error = 'Identifiants invalides';
       });
     }
+
   }
 };
 </script>

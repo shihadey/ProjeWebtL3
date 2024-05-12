@@ -4,6 +4,7 @@ const cors = require('cors');
 //pour le token d'autentification
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const my_secret_key = "675c893029cd2b77c8a6ec2c7da433e0b54239aed8163b7cdde05897a913951e";
 
 const app = express();
 app.use(express.json());
@@ -40,42 +41,45 @@ app.get('/', (req, res) => {
 
 // Route pour l'inscription
 app.post('/register', (req, res) => {
-  console.log('Requête POST reçue à /register:', req.body);
+  console.log('route register', req.body);
   const { username, email, password } = req.body;
 
-  // Vérification si l'utilisateur existe déjà
-  connection.query('SELECT * FROM users WHERE email = ?', [email], (error, results) => {
-    if (error) {
-      console.error('Erreur lors de la vérification de l\'utilisateur:', error);
+  // Hacher le mot de passe avant de l'enregistrer dans la base de données
+  bcrypt.hash(password, 10, (err, hash) => {
+    if (err) {
+      console.error('Erreur lors du hachage du mot de passe:', err);
       res.status(500).json({ message: 'Erreur serveur' });
       return;
     }
 
-    if (results.length > 0) {
-      // L'utilisateur existe déjà
-      res.status(409).json({ message: 'L\'utilisateur existe déjà' });
-    } else {
-      // Insérer le nouvel utilisateur dans la base de données
-      connection.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [username, email, password], (error) => {
-        if (error) {
-          console.error('Erreur lors de l\'inscription de l\'utilisateur:', error);
-          res.status(500).json({ message: 'Erreur serveur' });
-          return;
-        }
-        res.json({ message: 'Inscription réussie' });
-      });
-    }
+    // Enregistrer l'utilisateur dans la base de données avec le mot de passe haché
+    connection.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [username, email, hash], (error, results) => {
+      if (error) {
+        console.error('Erreur lors de l\'inscription de l\'utilisateur:', error);
+        res.status(500).json({ message: 'Erreur serveur' });
+        return;
+      }
+
+      // Récupérer l'ID de l'utilisateur nouvellement inséré
+      const userId = results.insertId;
+      console.log('Utilisateur inséré avec l\'ID:', userId);
+
+      // Authentification réussie, générer un token JWT avec l'ID de l'utilisateur
+      const token = jwt.sign({ userId: userId, username: username}, my_secret_key, { expiresIn: '1h' });
+      res.json({ token });
+    });
   });
 });
 
 
+
 // Route pour l'authentification
 app.post('/login', (req, res) => {
-  console.log('Requête POST reçue à /login:', req.body);
+  console.log('route login', req.body);
   const { email, password } = req.body;
 
   // Vérification des identifiants dans la base de données
-  connection.query('SELECT * FROM users WHERE email = ? AND password = ?', [email, password], (error, results) => {
+  connection.query('SELECT * FROM users WHERE email = ?', [email], (error, results) => {
     if (error) {
       console.error('Erreur lors de la vérification des identifiants:', error);
       res.status(500).json({ message: 'Erreur serveur' });
@@ -83,10 +87,25 @@ app.post('/login', (req, res) => {
     }
 
     if (results.length > 0) {
-      // Utilisateur authentifié avec succès
-      res.json({ message: 'Authentification réussie' });
+      // Utilisateur trouvé, vérifier le mot de passe
+      const user = results[0];
+      bcrypt.compare(password, user.password, (err, isMatch) => {
+        if (err) {
+          console.error('Erreur lors de la comparaison des mots de passe:', err);
+          res.status(500).json({ message: 'Erreur serveur' });
+          return;
+        }
+        if (isMatch) {
+          // Mot de passe correct, générer un token JWT
+          const token = jwt.sign({ userId: user.id }, my_secret_key, { expiresIn: '1h' });
+          res.json({ token });
+        } else {
+          // Mot de passe incorrect
+          res.status(401).json({ message: 'Identifiants invalidesBE' });
+        }
+      });
     } else {
-      // Identifiants invalides
+      // Utilisateur non trouvé
       res.status(401).json({ message: 'Identifiants invalides' });
     }
   });
