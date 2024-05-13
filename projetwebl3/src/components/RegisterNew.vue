@@ -1,5 +1,6 @@
 <template>
     <div>
+      <AppMenu></AppMenu>
       <h2>Inscription</h2>
       <form @submit.prevent="register">
         <div>
@@ -21,7 +22,13 @@
   </template>
   
   <script>
+  import AppMenu from './AppMenu.vue';
+
   export default {
+    name:'RegisterPage',
+    components: {
+      AppMenu
+    },
     data() {
       return {
         username: '',
@@ -54,7 +61,15 @@
               console.log("Token JWT reçu:", token);
               // Stocker le token JWT dans le stockage local
               localStorage.setItem('token', token);
-              // Rediriger l'utilisateur vers la page profil
+              // change les valeurs de l'état de connexion et du rôle de l'utilisateur
+              const role = data.role;
+              this.$store.commit('setLoggedIn', true);
+              if (role === 'admin') {
+                this.$store.commit('setIsAdmin',true);
+              }
+              else {
+                this.$store.commit('setIsAdmin',false);
+              }
               this.$router.push('/profile');
             });
         } else {

@@ -74,7 +74,7 @@ app.post('/register', (req, res) => {
         const res_role = results[0].role;
         // Authentification réussie, générer un token JWT avec l'ID de l'utilisateur
         const token = jwt.sign({ userId: userId, username: username, role:res_role}, my_secret_key, { expiresIn: '1h' });
-        res.json({ token });
+        res.json({ token },res_role);
       });
     });
   });
@@ -108,7 +108,7 @@ app.post('/login', (req, res) => {
           const res_username = user.username;
           // Authentification réussie, générer un token JWT avec l'ID de l'utilisateur
           const token = jwt.sign({ userId: userId, username: res_username, role: res_role }, my_secret_key, { expiresIn: '1h' });    
-          res.json({ token });
+          res.status(200).json({ token, role: res_role });
         } else {
           // Mot de passe incorrect
           res.status(401).json({ message: 'Identifiants invalidesBE' });
@@ -124,4 +124,44 @@ app.post('/login', (req, res) => {
 // Écoute du serveur sur le port spécifié
 app.listen(port, () => {
   console.log(`Serveur backend démarré sur http://localhost:${port}`);
+});
+
+
+// Middleware pour vérifier le rôle de l'utilisateur dans la base de données
+function checkUserRole(req, res, next) {
+  const token = req.headers.authorization;
+  if (token) {
+    // Décodez le token JWT pour obtenir les informations de l'utilisateur
+    const decodedToken = jwtDecode(token);
+    if (decodedToken && decodedToken.userId) {
+      const userId = decodedToken.userId;
+      // Vérifiez le rôle de l'utilisateur dans la base de données
+      connection.query('SELECT role FROM users WHERE id = ?', [userId], (error, results) => {
+        if (error) {
+          console.error('Erreur lors de la vérification du rôle de l\'utilisateur:', error);
+          return res.status(500).json({ message: 'Erreur serveur' });
+        }
+        // Vérifiez si l'utilisateur a le rôle d'administrateur
+        if (results.length > 0 && results[0].role === 'admin') {
+          // Si l'utilisateur a le rôle d'administrateur, passez à la route suivante
+          next();
+        } else {
+          // Si l'utilisateur n'est pas administrateur, renvoyer une erreur d'autorisation
+          return res.status(403).json({ message: 'Accès refusé. Vous n\'êtes pas autorisé à accéder à cette ressource.' });
+        }
+      });
+    } else {
+      // Si le token JWT est invalide, renvoyer une erreur d'authentification
+      return res.status(401).json({ message: 'Non authentifié. Veuillez vous connecter pour accéder à cette ressource.' });
+    }
+  } else {
+    // Si aucun token n'est fourni, renvoyer une erreur d'authentification
+    return res.status(401).json({ message: 'Non authentifié. Veuillez vous connecter pour accéder à cette ressource.' });
+  }
+}
+
+// Exemple d'utilisation du middleware pour restreindre l'accès à une route spécifique
+app.get('/admin/dashboard', checkUserRole, (req, res) => {
+  // Cette route ne sera accessible que par les utilisateurs avec le rôle d'administrateur
+  res.json({ message: 'Bienvenue sur le tableau de bord de l\'administrateur.' });
 });

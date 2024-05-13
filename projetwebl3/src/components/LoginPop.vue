@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- <AppMenu></AppMenu> -->
     <h2>Connexion</h2>
     <form @submit.prevent="login">
       <div>
@@ -14,21 +15,29 @@
       <p v-if="error" class="error">{{ error }}</p>
     </form>
 
-    <!-- Indicateur de connexion -->
-    <div v-if="isLoggedIn" class="connected-indicator">
+    <!-- Indicateur de connexion
+    <div v-if="this.$store.isLoggedIn" class="connected-indicator">
       Vous êtes connecté en tant que {{ email }}.
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script>
+// import AppMenu from './AppMenu.vue';
 export default {
+  // mounted() {
+  //   this.isLoggedIn = true;
+  // },
+  name:'LoginPage',
+  // components: {
+  //   AppMenu
+  // },
   data() {
     return {
       email: '',
       password: '',
       error: '',
-      isLoggedIn: false // Variable pour suivre l'état de connexion
+      // isLoggedIn: false // Variable pour suivre l'état de connexion
     };
   },
   methods: {
@@ -55,8 +64,17 @@ export default {
       .then(data => {
         // Stocker le token JWT dans le stockage local
         localStorage.setItem('token', data.token);
-        // Rediriger l'utilisateur vers une autre page par exemple
+        // change les valeurs de l'état de connexion et du rôle de l'utilisateur
+        // const role = data.role;
+        // this.$store.commit('setLoggedIn', true);
+        // if (role === 'admin') {
+        //   this.$store.commit('setIsAdmin',true);
+        // }
+        // else {
+        //   this.$store.commit('setIsAdmin',false);
+        // }
         this.$router.push('/profile');
+        
       })
       .catch(error => {
         console.error('Erreur lors de la connexion:', error);

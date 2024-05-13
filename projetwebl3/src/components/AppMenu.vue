@@ -1,22 +1,68 @@
 <template>
-  <div class="container">
-   <Menu></Menu>
-   <IndexPage></IndexPage>
+  <div class="jumbotron jumbotron-fluid bg-secondary rounded-bottom rounded-top" style="padding-top: 30px; padding-bottom: 30px; padding-left: 30px;">
+    <div class="banner-text text-white">
+      <h1>VueJs Shopping App</h1>
+      <!-- //tester les routes -->
+      <nav>
+        <!-- <router-link to="/">Accueil</router-link>
+        <router-link to="/products">Produits</router-link>
+        <router-link v-if="isLoggedIn" to="/orders">Commandes</router-link>
+        <router-link v-if="!isLoggedIn" to="/register">Creer compte</router-link>
+        <router-link v-if="!isLoggedIn" to="/login">Se connecter</router-link>
+        <router-link v-if="isLoggedIn" to="/profile">Profil</router-link>
+        <router-link v-if="isLoggedIn && isAdmin" to="/admin/dashboard">Tableau de bord administrateur</router-link> -->
+
+        <ul>
+          <li> <router-link to="/">Accueil</router-link></li>
+          <li v-if="isAuthenticated"><router-link to="/profile">Profil</router-link></li>
+          <li v-if="isAuthenticated"><router-link to="/orders">Commandes</router-link></li>
+          <li ><router-link to="/products">Produits</router-link></li>
+          <li v-if="!isAuthenticated"><router-link to="/register">Creer compte</router-link></li>
+          <li v-if="isAuthenticated && isAdmin"><router-link to="/admin/dashbaord">Admin Dashboard</router-link></li>
+          <!-- <li v-if="isLoggedIn"><button @click="logout">Déconnexion</button></li> -->
+          <li v-if="!isAuthenticated"><router-link to="/login">Connexion</router-link></li>
+      </ul>
+      </nav>
+    </div>
   </div>
- </template>
- 
- <script>
- import Menu from './components/AppMenu.vue'
- import IndexPage from "./components/IndexPage.vue";
- 
- export default {
-  name: 'App',
-  components: {
-   IndexPage,
-   Menu
-  }
- }
- </script>
- 
- <style>
- </style>
+</template>
+
+<script>
+import { jwtDecode } from 'jwt-decode';
+  export default {
+    name: 'AppMenu',
+    computed: {
+    isAuthenticated() {
+      return localStorage.getItem('token') !== null;
+    },
+    isAdmin() {
+      if (this.isAuthenticated) {
+        // Décoder le token JWT pour récupérer les informations
+        const token = localStorage.getItem('token');
+        const decodedToken = jwtDecode(token);
+        // Vérifier si l'utilisateur a le rôle d'administrateur
+        return decodedToken.role === 'ADMIN';
+      }
+      return false;
+    },
+  },
+  methods: {
+    logout() {
+        // Effacer les informations d'authentification du stockage local
+        localStorage.removeItem('token');
+        // Mettre à jour l'état de connexion
+        this.isLoggedIn = false;
+        // this.$store.commit('setLoggedIn', false); // Pour connecter l'utilisateur
+        // this.$store.commit('setIsAdmin', false); // Pour définir l'utilisateur comme administrateur
+
+        // Rediriger l'utilisateur vers la page de connexion ou toute autre page appropriée
+        this.$router.push('/login');
+    },
+  },
+  };
+    
+</script>
+
+<!-- Add " scoped " attribute to limit CSS to this component only -->
+<style scoped>
+</style>

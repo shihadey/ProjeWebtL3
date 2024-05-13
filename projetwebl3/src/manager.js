@@ -1,6 +1,3 @@
-
-
-
 //objects for markeplace
 
 class Product {

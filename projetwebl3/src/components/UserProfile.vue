@@ -1,18 +1,27 @@
 <template>
     <div>
       <!-- Afficher le message de bienvenue si l'utilisateur est connecté -->
+      <!-- <AppMenu></AppMenu> -->
       <div v-if="isLoggedIn" class="welcome-banner">
         Bienvenue {{ username }}, vous êtes {{ role }}
-        <button @click="logout">Déconnexion</button>
+        <button @click="logout()">Déconnexion</button>
+        <!-- <button @click="testAdmin()">TestAdmion</button> -->
       </div>
-      <!-- Autres contenus de la page ici -->
+      <!-- make a button appear if the user is admin-->
     </div>
   </template>
   
   <script>
   import { jwtDecode } from 'jwt-decode';
+  // import AppMenu from './AppMenu.vue';
+// import router from '@/router';
+  // import HomePage from './HomePage.vue';
 
   export default {
+    name:"UserProfile",
+    // components: {
+    //   AppMenu
+    // },
     data() {
       return {
         isLoggedIn: false,
@@ -40,13 +49,16 @@
         localStorage.removeItem('token');
         // Mettre à jour l'état de connexion
         this.isLoggedIn = false;
+        this.$store.commit('setLoggedIn', false); // Pour connecter l'utilisateur
+        this.$store.commit('setIsAdmin', false); // Pour définir l'utilisateur comme administrateur
+
         // Rediriger l'utilisateur vers la page de connexion ou toute autre page appropriée
         this.$router.push('/login');
       }
     }
   };
-  </script>
-  
+  </script>  
+
   <style>
   .welcome-banner {
     background-color: lightgreen;
