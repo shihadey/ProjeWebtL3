@@ -10,6 +10,9 @@ import Login from './components/LoginPop.vue';
 import UserProfile from './components/UserProfile.vue';
 import AdminDashboard from './components/AdminDashboard.vue';
 
+//libs
+import { jwtDecode } from 'jwt-decode';
+
 
 //routes pour les droits
 Vue.use(VueRouter);
@@ -22,11 +25,34 @@ const routes = [
   { path: '/register', component: Register },
   { path: '/login', component: Login },
   { path: '/profile', component: UserProfile },
-  { path: '/admin/dashboard', component: AdminDashboard }
+  // { path: '/AdminDashboard', component: AdminDashboard },
+  {path: '/AdminDashboard', 
+      component: AdminDashboard,
+      meta: { requiresAuth: true, requiresAdmin: true }
+    }
 ];
 
 const router = new VueRouter({
     routes
   });
+
+// Navigation guard pour vérifier l'authentification et le rôle
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = localStorage.getItem('token') !== null;
+  const token = localStorage.getItem('token');
+  const isAdmin = token ? jwtDecode(token).role === 'ADMIN' : false;
+
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!isAuthenticated) {
+      next('/login');
+    } else if (to.matched.some(record => record.meta.requiresAdmin) && !isAdmin) {
+      next('/');
+    } else {
+      next();
+    }
+  } else {
+    next();
+  }
+});
   
   export default router;

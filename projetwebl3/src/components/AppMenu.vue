@@ -14,13 +14,13 @@
 
         <ul>
           <li> <router-link to="/">Accueil</router-link></li>
+          <li ><router-link to="/products">Produits</router-link></li>
           <li v-if="isAuthenticated"><router-link to="/profile">Profil</router-link></li>
           <li v-if="isAuthenticated"><router-link to="/orders">Commandes</router-link></li>
-          <li ><router-link to="/products">Produits</router-link></li>
           <li v-if="!isAuthenticated"><router-link to="/register">Creer compte</router-link></li>
-          <li v-if="isAuthenticated && isAdmin"><router-link to="/admin/dashbaord">Admin Dashboard</router-link></li>
           <!-- <li v-if="isLoggedIn"><button @click="logout">Déconnexion</button></li> -->
           <li v-if="!isAuthenticated"><router-link to="/login">Connexion</router-link></li>
+          <li v-if="isAuthenticated && isAdmin"><router-link to="/AdminDashboard">Admin Dashboard</router-link></li>
       </ul>
       </nav>
     </div>
@@ -28,6 +28,7 @@
 </template>
 
 <script>
+// import AppMenu from './AppMenu.vue';
 import { jwtDecode } from 'jwt-decode';
   export default {
     name: 'AppMenu',
@@ -46,16 +47,15 @@ import { jwtDecode } from 'jwt-decode';
       return false;
     },
   },
+    // components: {
+    //   AppMenu
+    // },
   methods: {
     logout() {
         // Effacer les informations d'authentification du stockage local
         localStorage.removeItem('token');
         // Mettre à jour l'état de connexion
         this.isLoggedIn = false;
-        // this.$store.commit('setLoggedIn', false); // Pour connecter l'utilisateur
-        // this.$store.commit('setIsAdmin', false); // Pour définir l'utilisateur comme administrateur
-
-        // Rediriger l'utilisateur vers la page de connexion ou toute autre page appropriée
         this.$router.push('/login');
     },
   },

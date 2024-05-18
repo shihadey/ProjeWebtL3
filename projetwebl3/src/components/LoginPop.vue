@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- <AppMenu></AppMenu> -->
+    <AppMenu></AppMenu>
     <h2>Connexion</h2>
     <form @submit.prevent="login">
       <div>
@@ -23,15 +23,15 @@
 </template>
 
 <script>
-// import AppMenu from './AppMenu.vue';
+import AppMenu from './AppMenu.vue';
 export default {
   // mounted() {
   //   this.isLoggedIn = true;
   // },
   name:'LoginPage',
-  // components: {
-  //   AppMenu
-  // },
+  components: {
+    AppMenu
+  },
   data() {
     return {
       email: '',

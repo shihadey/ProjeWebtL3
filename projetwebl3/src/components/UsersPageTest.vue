@@ -1,4 +1,5 @@
 <template>
+    <AppMenu></AppMenu>
     <div>
       <h1>Utilisateurs</h1>
       <ul>
@@ -8,6 +9,7 @@
 </template>
 
 <script>
+import AppMenu from './AppMenu.vue';
 import axios from 'axios';
 
 export default {
@@ -15,6 +17,9 @@ export default {
     return {
       users: [],
     };
+  },
+  components: {
+    AppMenu
   },
   mounted() {
     axios.get('http://localhost:3000/users')
