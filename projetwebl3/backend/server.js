@@ -122,6 +122,47 @@ app.post('/login', (req, res) => {
 });
 
 
+// Middleware pour vérifier le rôle de l'utilisateur dans la base de données
+function checkUserRole(req, res, next) {
+  console.log("Checking authorization", req.headers);
+  const token = req.headers.authorization;
+  if (token) {
+    // Décodez le token JWT pour obtenir les informations de l'utilisateur
+    const decodedToken = jwtDecode(token);
+    if (decodedToken && decodedToken.userId) {
+      const userId = decodedToken.userId;
+      // Vérifiez le rôle de l'utilisateur dans la base de données
+      connection.query('SELECT role FROM users WHERE id = ?', [userId], (error, results) => {
+        if (error) {
+          console.error('Erreur lors de la vérification du rôle de l\'utilisateur:', error);
+          return res.status(500).json({ message: 'Erreur serveur' });
+        }
+        // Vérifiez si l'utilisateur a le rôle d'administrateur
+        if (results.length > 0 && results[0].role === 'ADMIN') {
+          // Si l'utilisateur a le rôle d'administrateur, passez à la route suivante
+          next();
+        } else {
+          // Si l'utilisateur n'est pas administrateur, renvoyer une erreur d'autorisation
+          return res.status(403).json({ message: 'Accès refusé. Vous n\'êtes pas autorisé à accéder à cette ressource.' });
+        }
+      });
+    } else {
+      // Si le token JWT est invalide, renvoyer une erreur d'authentification
+      return res.status(401).json({ message: 'Non authentifié. Veuillez vous connecter pour accéder à cette ressource.' });
+    }
+  } else {
+    // Si aucun token n'est fourni, renvoyer une erreur d'authentification
+    return res.status(401).json({ message: 'Non authentifié. Veuillez vous connecter pour accéder à cette ressource.' });
+  }
+}
+
+// Exemple d'utilisation du middleware pour restreindre l'accès à une route spécifique
+app.get('/AdminDashboard', checkUserRole, (req, res) => {
+  // Cette route ne sera accessible que par les utilisateurs avec le rôle d'administrateur
+  console.log('route AdminDashboard demandée');
+  res.json({ message: 'Bienvenue sur le tableau de bord de l\'administrateur.' });
+});
+
 
 // Écoute du serveur sur le port spécifié
 app.listen(port, () => {
