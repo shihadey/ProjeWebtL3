@@ -39,7 +39,7 @@ app.get('/', (req, res) => {
 });
 
 // Middleware pour servir les fichiers statiques
-app.use(express.static(path.join(__dirname, 'dist')));
+// app.use(express.static(path.join(__dirname, 'dist')));
 
 // Route pour l'inscription
 app.post('/register', (req, res) => {
