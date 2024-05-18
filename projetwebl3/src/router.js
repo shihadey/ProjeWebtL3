@@ -9,6 +9,7 @@ import Register from './components/RegisterNew.vue';
 import Login from './components/LoginPop.vue';
 import UserProfile from './components/UserProfile.vue';
 import AdminDashboard from './components/AdminDashboard.vue';
+import NotFound from './components/NotFound.vue';
 
 //libs
 import { jwtDecode } from 'jwt-decode';
@@ -20,6 +21,7 @@ Vue.use(VueRouter);
 // Définissez vos routes
 const routes = [
   { path: '/', component: Home },
+  { path: '*', component: NotFound },
   { path: '/products', component: Products },
   { path: '/orders', component: Orders },
   { path: '/register', component: Register },
@@ -33,7 +35,8 @@ const routes = [
 ];
 
 const router = new VueRouter({
-    routes
+  mode: 'history',
+  routes
   });
 
 // Navigation guard pour vérifier l'authentification et le rôle

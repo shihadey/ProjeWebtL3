@@ -38,6 +38,8 @@ app.get('/', (req, res) => {
   res.send('Bonjour depuis le serveur backend !');
 });
 
+// Middleware pour servir les fichiers statiques
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // Route pour l'inscription
 app.post('/register', (req, res) => {
@@ -163,6 +165,10 @@ app.get('/AdminDashboard', checkUserRole, (req, res) => {
   res.json({ message: 'Bienvenue sur le tableau de bord de l\'administrateur.' });
 });
 
+// Redirection des routes non gérées vers index.html (pour le mode "history" de Vue Router)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
 
 // Écoute du serveur sur le port spécifié
 app.listen(port, () => {
