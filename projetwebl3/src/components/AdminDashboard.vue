@@ -1,44 +1,80 @@
 <template>
-    <div>
+  <div class="AdminDashboard">
       <AppMenu></AppMenu>
-        <!-- Lien vers la page du tableau de bord de l'administrateur -->
-        <!-- <router-link v-if="isLoggedIn && isAdmin" to="/admin/dashboard">Tableau de bord administrateur</router-link> -->
-        <!-- <router-link to="/admin/dashboard">Tableau de bord administrateur NH</router-link> -->
-        <!-- Autres liens et contenu de la page ici -->
-      <p>Bienvenue sur le dashbaord admin</p>
-    </div>
-  </template>
-  
-  <script>
-  import AppMenu from './AppMenu.vue';
-  // import { jwtDecode } from 'jwt-decode';
-  
-  export default {
-    // data() {
-    //   return {
-    //     isLoggedIn: false,
-    //     isAdmin: false
-    //   };
-    // },
-    components: {
+    <h1>Gestion de stock des produits</h1>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nom du produit</th>
+          <th>Stock</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="product in list_products" :key="product.id">
+          <td>{{ product.name }}</td>
+          <td>{{ product.stock }}</td>
+          <td>
+            <button class="btn btn-success btn-sm" @click="increaseStock(product.id)">Ajouter</button>
+            <button class="btn btn-danger btn-sm" @click="decreaseStock(product.id)" :disabled="product.stock === 0">Enlever</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+
+<script>
+import { Stock } from '../manager';
+import AppMenu from './AppMenu.vue';
+
+
+export default {
+  name: 'AdminDashboard',
+   components: {
       AppMenu
+ },
+  data() {
+    return {
+      stock: Stock,
+      list_products: Stock.get_list_product()
+    };
+  },
+  methods: {
+    increaseStock(id) {
+      const product = this.stock.get_prod_by_id(id);
+      if (product) {
+        product.stock += 1;
+      }
     },
-    // created() {
-    //   // Vérifier si l'utilisateur est connecté en consultant le stockage local
-    //   const token = localStorage.getItem('token');
-    //   if (token) {
-    //     // Décodez le token JWT pour obtenir les informations de l'utilisateur
-    //     const decodedToken = jwtDecode(token);
-    //     if (decodedToken && decodedToken.userId) {
-    //       // Mettre à jour l'état de connexion
-    //       this.isLoggedIn = true;
-    //       // Vérifier si l'utilisateur est administrateur
-    //       if (decodedToken.role === 'ADMIN') {
-    //         this.isAdmin = true;
-    //       }
-    //     }
-    //   }
-    // }
-  };
-  </script>
-  
+    decreaseStock(id) {
+      const product = this.stock.get_prod_by_id(id);
+      if (product && product.stock > 0) {
+        product.stock -= 1;
+      }
+    }
+  }
+};
+</script>
+
+<style scoped>
+.table {
+  width: 100%;
+  margin: 20px 0;
+  border-collapse: collapse;
+}
+
+.table th, .table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.table th {
+  background-color: #f4f4f4;
+}
+
+.btn {
+  margin: 0 5px;
+}
+</style>
