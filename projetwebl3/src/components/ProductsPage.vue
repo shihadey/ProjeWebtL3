@@ -15,7 +15,7 @@
                 v-if="product.stock > 0"
                 type="button"
                 class="btn btn-success btn-sm"
-                v-on:click="add_to_cart(product.id)"
+                @click="add_to_cart(product.id)"
                 >Ajouter au panier</button>
                 <span v-else class="text-danger">En rupture de stock</span>
             </div>
@@ -29,17 +29,15 @@
             <h5>Cart</h5>
           </div>
         </div>
-
         <div class="row gx-4 row-cols-1">
           <div class="col" v-for="(value, id) in list_cart" :key="id">
             <div class="p-3 border bg-light">
               {{ get_info_product(id) }}
               <h5>{{ desc_product.name }}</h5>
               <h6>Quantité: {{ value }}</h6>
-              <button type="button" class="btn btn-success btn-sm" v-on:click="remove_from_cart(id)">Supprimer</button>
+              <button type="button" class="btn btn-success btn-sm" @click="remove_from_cart(id)">Supprimer</button>
             </div>
           </div>
-      
           <!-- show total -->
           <div class="col">
             <div class="p-3 border bg-success">
@@ -47,11 +45,17 @@
               <h6>Nombre de produits: {{ nbr_product }}</h6>
             </div>
           </div>
+          <!-- PayPal button -->
+          <div class="col">
+            <div class="p-3 border bg-light">
+              <div id="paypal-button-container"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</template>
+</template> 
 
 <script>
 import AppMenu from './AppMenu.vue';
@@ -70,8 +74,15 @@ export default {
       list_cart: {},
       desc_product: {},
       total_price: 0,
-      nbr_product: 0
+      nbr_product: 0,
+      paypalLoaded: false
     };
+  },
+  created() {
+    this.loadPaypalScript().then(() => {
+      this.update_cart();  
+      this.loadPaypal();   
+    });
   },
   methods: {
     add_to_cart(id) {
@@ -92,10 +103,46 @@ export default {
     remove_from_cart(id) {
       this.cart.removeFromCart(id, this.stock);
       this.update_cart();
+    },
+    loadPaypalScript() {
+      return new Promise((resolve, reject) => {
+        if (document.getElementById('paypal-sdk')) {
+          return resolve();
+        }
+        const script = document.createElement('script');
+        script.id = 'paypal-sdk';
+        script.src = "https://www.paypal.com/sdk/js?client-id=AXbYB1iR9SmZHCpzpmFYgusi-8_qq8LJ7iYTmbHbtOTeKHzznbtpGArXHY0C14ZLltmEl_2A3mOIzzBF&currency=EUR";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    },
+    loadPaypal() {
+      if (window.paypal) {
+        window.paypal.Buttons({
+          createOrder: (data, actions) => {
+            return actions.order.create({
+              purchase_units: [{
+                amount: {
+                  value: this.total_price.toString()
+                }
+              }]
+            });
+          },
+          onApprove: (data, actions) => {
+            return actions.order.capture().then(details => {
+              alert('Transaction completed by ' + details.payer.name.given_name);
+            });
+          },
+          onError: (err) => {
+            console.error(err);
+          }
+        }).render('#paypal-button-container');
+        this.paypalLoaded = true;
+      }
     }
   }
 };
 </script>
-
 <style scoped>
 </style>
