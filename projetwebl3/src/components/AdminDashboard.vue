@@ -1,7 +1,7 @@
 <template>
   <div class="AdminDashboard">
       <AppMenu></AppMenu>
-    <h1>Gestion du stock</h1>
+    <h1>Gestion de stock des produits</h1>
     <table class="table">
       <thead>
         <tr>
