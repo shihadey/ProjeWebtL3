@@ -1,3 +1,6 @@
+product
+
+
 <template>
   <div class="IndexPage">
     <AppMenu></AppMenu>
@@ -75,7 +78,20 @@ export default {
       desc_product: {},
       total_price: 0,
       nbr_product: 0,
-      paypalLoaded: false
+      paypalLoaded: false,
+      sales_amount: 0,
+      sales_nb: 0,
+      g1_sales: 0,
+      g2_sales: 0,
+      g3_sales: 0,
+      g4_sales: 0,
+      g5_sales: 0,
+      g6_sales: 0,
+      g7_sales: 0,
+      g8_sales: 0,
+      g9_sales: 0,
+      g10_sales: 0,
+      g11_sales: 0
     };
   },
   created() {
@@ -132,6 +148,7 @@ export default {
           onApprove: (data, actions) => {
             return actions.order.capture().then(details => {
               alert('Transaction completed by ' + details.payer.name.given_name);
+              this.update_sales();
             });
           },
           onError: (err) => {
@@ -140,6 +157,20 @@ export default {
         }).render('#paypal-button-container');
         this.paypalLoaded = true;
       }
+    },
+    update_sales() {
+      this.sales_amount += this.total_price;
+      this.sales_nb += 1;
+      for (const id in this.list_cart) {
+        if (Object.prototype.hasOwnProperty.call(this.list_cart, id)) {
+          this[`g${id}_sales`] += this.list_cart[id];
+        }
+      }
+      this.clear_cart();
+    },
+    clear_cart() {
+      this.cart.clear();
+      this.update_cart();
     }
   }
 };
