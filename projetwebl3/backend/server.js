@@ -64,9 +64,8 @@ app.post('/register', (req, res) => {
       }
 
       // Récupérer l'ID de l'utilisateur nouvellement inséré
-      const userId = results.insertId;
       // récupère le role de l'user crée
-      connection.query('SELECT * FROM users WHERE id =?', [userId], (error, results) => {
+      connection.query('SELECT * FROM users WHERE email =?', [email], (error, results) => {
         if (error) {
           console.error('Erreur lors de la récupération du role de l\'utilisateur:', error);
           res.status(500).json({ message: 'Erreur serveur' });
@@ -74,13 +73,100 @@ app.post('/register', (req, res) => {
         }
         // console.log("role de l'user crée", results[0].role_id);
         const res_role = results[0].role;
+        const userId = results[0].id;
         // Authentification réussie, générer un token JWT avec l'ID de l'utilisateur
-        const token = jwt.sign({ userId: userId, username: username, role:res_role}, my_secret_key, { expiresIn: '1h' });
-        res.json({ token },res_role);
+        const token = jwt.sign({ userId: userId, username: username, role: res_role }, my_secret_key, { expiresIn: '1h' });    
+        res.status(200).json({ token, role: res_role });
       });
     });
   });
 });
+
+//Modifier le Mot de passe tadaaaa
+// ===================================
+
+// Endpoint to change password
+app.post('/change-password', (req, res) => {
+  console.log('route chpw', req.body);
+  const { email, currentPassword, newPassword } = req.body;
+  connection.query('SELECT * FROM users WHERE email = ?', [email], (error, results) => {
+    if (error) {
+      console.error('Erreur lors de la vérification des identifiants:', error);
+      res.status(500).json({ message: 'Erreur serveur' });
+      return;
+    }
+  
+    if (results.length > 0) {
+      // Utilisateur trouvé, vérifier le mot de passe
+      const user = results[0];
+      bcrypt.compare(currentPassword, user.password, (err, isMatch) => {
+        if (err) {
+          console.error('Erreur lors de la comparaison des mots de passe:', err);
+          res.status(500).json({ message: 'Mot de passe invalide' });
+          return;
+        }
+      });
+    } else {
+      // Utilisateur non trouvé
+      res.status(401).json({ message: 'Identifiants invalides' });
+    }
+    // Hash the new password
+    bcrypt.hash(newPassword, 10, (err, hash) => {
+      if (err) {
+          console.error(err);
+          return;
+      }
+  
+      // Update the password in the database
+
+     connection.query('UPDATE users SET password = ? WHERE email = ?', [hash, email], (err, results) => {
+      if (err) {
+        console.error('Error updating password:', err);
+        return res.status(500).json({ message: 'Server error' });
+      }
+
+      res.status(200).json({ message: 'Password updated successfully' });
+    })
+  });
+     
+
+  });
+  // Fetch the current password hash from the database
+  // connection.query('SELECT password FROM users WHERE id = ?', [userId], async (err, results) => {
+  //   if (err) {
+  //     console.error('Error fetching user:', err);
+  //     return res.status(500).json({ message: 'Server error' });
+  //   }
+
+  //   if (results.length === 0) {
+  //     return res.status(404).json({ message: 'User not found' });
+  //   }
+
+  //   const currentPasswordHash = results[0].password;
+
+  //   // Compare the current password with the hash
+  //   const match = await bcrypt.compare(currentPassword, currentPasswordHash);
+  //   if (!match) {
+  //     return res.status(400).json({ message: 'Current password is incorrect' });
+  //   }
+
+  //   // Hash the new password
+  //   const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+  //   // Update the password in the database
+  //   db.query('UPDATE users SET password = ? WHERE id = ?', [newPasswordHash, userId], (err, results) => {
+  //     if (err) {
+  //       console.error('Error updating password:', err);
+  //       return res.status(500).json({ message: 'Server error' });
+  //     }
+
+  //     res.status(200).json({ message: 'Password updated successfully' });
+  //   });
+  // });
+});
+
+// End of change password
+//..................................
 
 // Route pour l'authentification
 app.post('/login', (req, res) => {

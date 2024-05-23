@@ -5,6 +5,7 @@
       <div v-if="isLoggedIn" class="welcome-banner">
         Bienvenue {{ username }}, vous êtes {{ role }}
         <button @click="logout()">Déconnexion</button>
+        <button @click="move()">Edit password</button>
         <!-- <button @click="testAdmin()">TestAdmion</button> -->
       </div>
       <!-- make a button appear if the user is admin-->
@@ -54,6 +55,9 @@
 
         // Rediriger l'utilisateur vers la page de connexion ou toute autre page appropriée
         this.$router.push('/login');
+      },
+      move(){
+        this.$router.push('/change-password');
       }
     }
   };

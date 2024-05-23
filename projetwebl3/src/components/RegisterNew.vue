@@ -62,14 +62,14 @@
               // Stocker le token JWT dans le stockage local
               localStorage.setItem('token', token);
               // change les valeurs de l'état de connexion et du rôle de l'utilisateur
-              const role = data.role;
-              this.$store.commit('setLoggedIn', true);
-              if (role === 'admin') {
-                this.$store.commit('setIsAdmin',true);
-              }
-              else {
-                this.$store.commit('setIsAdmin',false);
-              }
+              //const role = data.role;
+              //this.$store.commit('setLoggedIn', true);
+              //if (role === 'admin') {
+              //  this.$store.commit('setIsAdmin',true);
+              //}
+              //else {
+              //  this.$store.commit('setIsAdmin',false);
+              //}
               this.$router.push('/profile');
             });
         } else {
